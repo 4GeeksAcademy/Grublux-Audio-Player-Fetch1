@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //include images into your bundle
 import rigoImage from "../../img/rigo-baby.jpg";
@@ -13,56 +13,31 @@ const MainPlayer = () => {
 
     var audioJS = null;
 
+    const [newSongs, setNewSongs] = useState([]);
 
-    let tunesArray = [
-        {
-            title: "South Park",
-            id: "south-park",
-            author: "Kyle",
-            url:
-                "https://assets.breatheco.de/apis/sound/files/cartoons/songs/south-park.mp3"
-        },
-        {
-            title: "Thunder Cats",
-            id: "thundercats",
-            author: "Moonra",
-            url:
-                "https://assets.breatheco.de/apis/sound/files/cartoons/songs/thundercats.mp3"
-        },
-        {
-            title: "X-Men",
-            id: "x-men",
-            author: "Profesor",
-            url:
-                "https://assets.breatheco.de/apis/sound/files/cartoons/songs/x-men.mp3"
-        },
-        {
-            title: "South Park Remix",
-            id: "south-park",
-            author: "Kyle",
-            url:
-                "https://assets.breatheco.de/apis/sound/files/cartoons/songs/south-park.mp3"
-        },
-        {
-            title: "Thunder Cats Remix",
-            id: "thundercats",
-            author: "Moonra",
-            url:
-                "https://assets.breatheco.de/apis/sound/files/cartoons/songs/thundercats.mp3"
-        },
-        {
-            title: "X-Men Remix",
-            id: "x-men",
-            author: "Profesor",
-            url:
-                "https://assets.breatheco.de/apis/sound/files/cartoons/songs/x-men.mp3"
-        }
-
-    ]
+    useEffect(() => {
+        fetch('https://playground.4geeks.com/apis/fake/sound/songs')
+            .then(response => {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                // Read the response as JSON
+                return response.json();
+            })
+            .then(responseAsJson => {
+                // Do stuff with the JSONified response
+                setNewSongs(responseAsJson);
+                console.log(responseAsJson);
+            })
+            .catch(error => {
+                console.log('Looks like there was a problem: \n', error);
+            });
+    }, []);
 
     const playAudio = (ind) => {
         // if ((ind <= (tunesArray.length - 1)) && (ind >= 0)) {
-        audioJS.src = tunesArray[ind].url;
+        let songUrl = 'https://playground.4geeks.com/apis/fake/sound/' + newSongs[ind].url
+        audioJS.src = songUrl;
         audioJS.play();
         setCurrentSong(ind);
         setPlaying(true);
@@ -78,7 +53,7 @@ const MainPlayer = () => {
 
     return (
         <>
-            {tunesArray.map(
+            {newSongs.map(
                 (songObj, ind) => {
                     return (
                         <div className={"col-7   text-white p-1" + (currentSong == ind ? ' bg-secondary' : ' bg-dark')}
@@ -90,14 +65,14 @@ const MainPlayer = () => {
                             }
                             }
                         >
-                            <span>{ind + 1}</span> {songObj.title}
+                            <span>{ind + 1} - </span> {songObj.name}
                         </div>)
                 }
             )}
             <div className="col-7  bg-dark text-white text-center p-1">
                 <audio ref={elm => audioJS = elm} />
                 <button className="fs-2 me-5"
-                    onClick={() => currentSong == (0) ? playAudio(tunesArray.length - 1)
+                    onClick={() => currentSong == (0) ? playAudio(newSongs.length - 1)
                         : playAudio(currentSong - 1)
                     }
                 ><i className="fa-solid fa-backward"></i></button>
@@ -113,7 +88,7 @@ const MainPlayer = () => {
                     style={{ display: playing ? "inline" : "none" }}
                 ><i className="fa-solid fa-pause"></i></button>
                 <button className="fs-2 ms-5"
-                    onClick={() => currentSong == (tunesArray.length - 1) ? playAudio(0)
+                    onClick={() => currentSong == (newSongs.length - 1) ? playAudio(0)
                         : playAudio(currentSong + 1)
                     }
                 ><i className="fa-solid fa-forward"></i></button>
